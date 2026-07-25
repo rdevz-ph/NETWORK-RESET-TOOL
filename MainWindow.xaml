@@ -1,0 +1,379 @@
+<Window x:Class="NetworkResetTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetworkResetTool"
+        mc:Ignorable="d"
+        Title="Network Reset Utility" 
+        Height="780" 
+        Width="1150"
+        MinWidth="950" 
+        MinHeight="650"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource ColorBg}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Left Sidebar for Adapters -->
+            <ColumnDefinition Width="380" />
+            <!-- Main Content Area -->
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT SIDEBAR: Active Adapters -->
+        <Border Grid.Column="0" 
+                Background="{StaticResource ColorSurface}" 
+                BorderBrush="{StaticResource ColorBorder}" 
+                BorderThickness="0,0,1,0">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Sidebar Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Network Adapters" 
+                               Foreground="{StaticResource ColorTextPrimary}" 
+                               FontSize="20" 
+                               FontFamily="Segoe UI Semibold, Segoe UI"/>
+                    <TextBlock Text="Currently detected configurations" 
+                               Foreground="{StaticResource ColorTextSecondary}" 
+                               FontSize="12" 
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Divider -->
+                <Border Grid.Row="1" 
+                        BorderBrush="{StaticResource ColorBorder}" 
+                        BorderThickness="0,0,0,1" 
+                        Margin="0,0,0,15"/>
+
+                <!-- Adapters List (Scrollable) -->
+                <ScrollViewer Grid.Row="2" 
+                              VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="AdaptersItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource ColorSurfaceLight}" 
+                                        BorderBrush="{StaticResource ColorBorder}" 
+                                        BorderThickness="1" 
+                                        CornerRadius="8" 
+                                        Padding="15" 
+                                        Margin="0,0,0,15">
+                                    <StackPanel>
+                                        <!-- Header: Name & Status -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Adapter Name -->
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Foreground="{StaticResource ColorTextPrimary}" 
+                                                       FontSize="15" 
+                                                       FontFamily="Segoe UI Semibold" 
+                                                       TextTrimming="CharacterEllipsis"/>
+
+                                            <!-- Operational Status Badge -->
+                                            <Border Grid.Column="1" 
+                                                    CornerRadius="4" 
+                                                    Padding="6,2" 
+                                                    VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Up">
+                                                                <Setter Property="Background" Value="#224CAF50"/>
+                                                                <Setter Property="BorderBrush" Value="#444CAF50"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                        <Setter Property="Background" Value="#22F44336"/>
+                                                        <Setter Property="BorderBrush" Value="#44F44336"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding Status}" 
+                                                           FontSize="10" 
+                                                           FontFamily="Segoe UI Semibold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Up">
+                                                                    <Setter Property="Foreground" Value="#4CAF50"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                            <Setter Property="Foreground" Value="#F44336"/>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Adapter Description -->
+                                        <TextBlock Text="{Binding Description}" 
+                                                   Foreground="{StaticResource ColorTextSecondary}" 
+                                                   FontSize="11" 
+                                                   Margin="0,4,0,10" 
+                                                   TextTrimming="CharacterEllipsis"/>
+
+                                        <!-- IPv4 -->
+                                        <StackPanel Margin="0,0,0,4">
+                                            <TextBlock Text="IPv4 Address" Foreground="{StaticResource ColorTextSecondary}" FontSize="10"/>
+                                            <TextBlock Text="{Binding IPv4Address}" Foreground="{StaticResource ColorTextPrimary}" FontSize="13"/>
+                                        </StackPanel>
+
+                                        <!-- Subnet Mask -->
+                                        <StackPanel Margin="0,0,0,4">
+                                            <TextBlock Text="Subnet Mask" Foreground="{StaticResource ColorTextSecondary}" FontSize="10"/>
+                                            <TextBlock Text="{Binding SubnetMask}" Foreground="{StaticResource ColorTextPrimary}" FontSize="13"/>
+                                        </StackPanel>
+
+                                        <!-- Default Gateway -->
+                                        <StackPanel Margin="0,0,0,4">
+                                            <TextBlock Text="Default Gateway" Foreground="{StaticResource ColorTextSecondary}" FontSize="10"/>
+                                            <TextBlock Text="{Binding Gateway}" Foreground="{StaticResource ColorTextPrimary}" FontSize="13"/>
+                                        </StackPanel>
+
+                                        <!-- DNS Servers -->
+                                        <StackPanel Margin="0,0,0,4">
+                                            <TextBlock Text="DNS Servers" Foreground="{StaticResource ColorTextSecondary}" FontSize="10"/>
+                                            <TextBlock Text="{Binding DnsServers}" Foreground="{StaticResource ColorTextPrimary}" FontSize="13" TextWrapping="Wrap"/>
+                                        </StackPanel>
+
+                                        <!-- DHCP Status -->
+                                        <Grid Margin="0,4,0,0">
+                                            <TextBlock Text="DHCP Enabled" Foreground="{StaticResource ColorTextSecondary}" FontSize="10"/>
+                                            <TextBlock Text="{Binding DhcpEnabled}" Foreground="{StaticResource ColorTextPrimary}" FontSize="11" HorizontalAlignment="Right" FontFamily="Segoe UI Semibold"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Refresh Button -->
+                <Button Grid.Row="3" 
+                        Content="Refresh Adapters" 
+                        Style="{StaticResource SecondaryButton}" 
+                        Click="RefreshAdapters_Click" 
+                        Margin="0,15,0,0"
+                        HorizontalAlignment="Stretch"/>
+            </Grid>
+        </Border>
+
+        <!-- RIGHT PANEL: Steps and Terminal Log -->
+        <Grid Grid.Column="1" Margin="25">
+            <Grid.RowDefinitions>
+                <!-- Title & Privileges Badge -->
+                <RowDefinition Height="Auto"/>
+                <!-- Reset Steps -->
+                <RowDefinition Height="310"/>
+                <!-- Reset Progress Bar & Control Buttons -->
+                <RowDefinition Height="Auto"/>
+                <!-- Live Logs Header -->
+                <RowDefinition Height="Auto"/>
+                <!-- Live Terminal Log -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Row -->
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Network Reset Pipeline" 
+                               Foreground="{StaticResource ColorTextPrimary}" 
+                               FontSize="22" 
+                               FontFamily="Segoe UI Semibold, Segoe UI"/>
+                    <TextBlock Text="Step-by-step diagnostic and cache resets" 
+                               Foreground="{StaticResource ColorTextSecondary}" 
+                               FontSize="13"/>
+                </StackPanel>
+
+                <!-- Administrator Shield Badge -->
+                <Border Grid.Column="1" 
+                        Background="#2203DAC6" 
+                        BorderBrush="#4403DAC6" 
+                        BorderThickness="1" 
+                        CornerRadius="4" 
+                        Padding="8,4" 
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <!-- Shield Vector Icon -->
+                        <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,11.9H19C18.47,16.11 15.72,19.78 12,20.9V11.9H5V6.3L12,3.18V11.9Z" 
+                              Fill="{StaticResource ColorAccent}" 
+                              Width="12" Height="12" 
+                              Margin="0,0,6,0" 
+                              VerticalAlignment="Center"/>
+                        <TextBlock Text="Administrator Mode" 
+                                   Foreground="{StaticResource ColorAccent}" 
+                                   FontSize="11" 
+                                   FontFamily="Segoe UI Semibold" 
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Reset Steps List -->
+            <Border Grid.Row="1" 
+                    Background="{StaticResource ColorSurface}" 
+                    BorderBrush="{StaticResource ColorBorder}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="15" 
+                    Margin="0,0,0,15">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="StepsItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource ColorBorder}" 
+                                        BorderThickness="0,0,0,1" 
+                                        Padding="0,10" 
+                                        Margin="0,0,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="30"/>
+                                            <ColumnDefinition Width="36"/>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="90"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Manual Select Checkbox -->
+                                        <CheckBox Grid.Column="0" 
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  Style="{StaticResource ModernCheckBox}"
+                                                  IsEnabled="{Binding ElementName=StartResetButton, Path=IsEnabled}"
+                                                  VerticalAlignment="Center" 
+                                                  HorizontalAlignment="Left"/>
+
+                                        <!-- Status Icon (Animated Spinning when running) -->
+                                        <Path Grid.Column="1" 
+                                              Data="{Binding IconData}" 
+                                              Fill="{Binding StatusBrush}" 
+                                              Width="16" Height="16" 
+                                              Style="{StaticResource SpinnerPathStyle}"
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Left"/>
+
+                                        <!-- Description -->
+                                        <TextBlock Grid.Column="2" 
+                                                   Text="{Binding Description}" 
+                                                   Foreground="{StaticResource ColorTextPrimary}" 
+                                                   FontSize="13.5" 
+                                                   FontFamily="Segoe UI Semibold" 
+                                                   VerticalAlignment="Center"/>
+
+                                        <!-- Command Text -->
+                                        <TextBlock Grid.Column="3" 
+                                                   Text="{Binding Command}" 
+                                                   Foreground="{StaticResource ColorTextSecondary}" 
+                                                   FontFamily="Consolas, Cascadia Code" 
+                                                   FontSize="12" 
+                                                   VerticalAlignment="Center" 
+                                                   Margin="10,0,0,0"/>
+
+                                        <!-- Status Text Badge -->
+                                        <TextBlock Grid.Column="4" 
+                                                   Text="{Binding StatusText}" 
+                                                   Foreground="{Binding StatusBrush}" 
+                                                   FontSize="12.5" 
+                                                   FontFamily="Segoe UI Semibold" 
+                                                   HorizontalAlignment="Right" 
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Progress & Controls -->
+            <Grid Grid.Row="2" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Custom Progress Bar -->
+                <ProgressBar x:Name="ResetProgressBar" 
+                             Grid.Column="0" 
+                             Height="6" 
+                             VerticalAlignment="Center" 
+                             Background="{StaticResource ColorSurface}" 
+                             BorderThickness="0" 
+                             Margin="0,0,20,0"
+                             Foreground="{StaticResource ColorAccent}"/>
+
+                <!-- Start Action Button -->
+                <Button Grid.Column="1" 
+                        x:Name="StartResetButton" 
+                        Content="Start Network Reset" 
+                        Style="{StaticResource AccentButton}" 
+                        Click="StartResetButton_Click"/>
+            </Grid>
+
+            <!-- Logs Section Header -->
+            <TextBlock Grid.Row="3" 
+                       Text="Real-time Execution Logs" 
+                       Foreground="{StaticResource ColorTextPrimary}" 
+                       FontSize="15" 
+                       FontFamily="Segoe UI Semibold" 
+                       Margin="0,0,0,8"/>
+
+            <!-- Terminal log Output -->
+            <Border Grid.Row="4" 
+                    Background="#0A0A0A" 
+                    BorderBrush="{StaticResource ColorBorder}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="15">
+                <ScrollViewer x:Name="LogScrollViewer" 
+                              VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="LogsItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <!-- Timestamp -->
+                                    <TextBlock Text="{Binding Timestamp, StringFormat=[{0}]}" 
+                                               Foreground="#555555" 
+                                               FontFamily="Consolas, Cascadia Code, Courier New" 
+                                               FontSize="12" 
+                                               Margin="0,0,10,0"/>
+                                    
+                                    <!-- Level Badge -->
+                                    <TextBlock Text="{Binding Level, StringFormat=[{0}]}" 
+                                               Foreground="{Binding LevelBrush}" 
+                                               FontFamily="Consolas, Cascadia Code, Courier New" 
+                                               FontSize="12" 
+                                               Width="70"
+                                               Margin="0,0,10,0"/>
+
+                                    <!-- Message -->
+                                    <TextBlock Text="{Binding Message}" 
+                                               Foreground="{Binding LevelBrush}" 
+                                               FontFamily="Consolas, Cascadia Code, Courier New" 
+                                               FontSize="12" 
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

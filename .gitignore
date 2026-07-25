@@ -1,0 +1,30 @@
+## Build Outputs
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+
+## IDE and Editor Specific Files
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+## Operating System Specific Files
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Log and Temp files
+*.log
+*.tmp
