@@ -214,6 +214,7 @@
                         <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,11.9H19C18.47,16.11 15.72,19.78 12,20.9V11.9H5V6.3L12,3.18V11.9Z" 
                               Fill="{StaticResource ColorAccent}" 
                               Width="12" Height="12" 
+                              Stretch="Uniform"
                               Margin="0,0,6,0" 
                               VerticalAlignment="Center"/>
                         <TextBlock Text="Administrator Mode" 
@@ -265,6 +266,7 @@
                                                       Data="{Binding IconData}" 
                                                       Fill="{Binding StatusBrush}" 
                                                       Width="16" Height="16" 
+                                                      Stretch="Uniform"
                                                       Style="{StaticResource SpinnerPathStyle}"
                                                       VerticalAlignment="Center" 
                                                       HorizontalAlignment="Left"/>
@@ -334,13 +336,25 @@
                                               Unchecked="InsecureGuestLogons_Unchecked"
                                               IsEnabled="{Binding ElementName=StartResetButton, Path=IsEnabled}"
                                               VerticalAlignment="Center"/>
-                                    <!-- Info path icon with ToolTip explaining what this is -->
-                                    <Path Data="M11,9H13V7H11V9M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
-                                          Fill="{StaticResource ColorTextSecondary}"
-                                          Width="14" Height="14"
-                                          Margin="8,0,0,0"
-                                          VerticalAlignment="Center"
-                                          ToolTip="Allows Windows client to access unauthenticated SMB shares. Fixes 'insecure guest logons are blocked' errors."/>
+                                     <!-- Clickable Info Icon Button (shows description dialog on click) -->
+                                     <Button Background="Transparent" 
+                                             BorderThickness="0" 
+                                             Padding="0" 
+                                             Margin="8,0,0,0" 
+                                             Cursor="Hand"
+                                             Focusable="False"
+                                             VerticalAlignment="Center"
+                                             Click="InfoIcon_Click">
+                                         <Button.Template>
+                                             <ControlTemplate TargetType="Button">
+                                                 <ContentPresenter />
+                                             </ControlTemplate>
+                                         </Button.Template>
+                                         <Path Data="M11,9H13V7H11V9M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
+                                               Fill="{StaticResource ColorTextSecondary}"
+                                               Width="14" Height="14"
+                                               Stretch="Uniform"/>
+                                     </Button>
                                 </StackPanel>
                             </Border>
 

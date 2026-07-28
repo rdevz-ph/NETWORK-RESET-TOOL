@@ -205,6 +205,7 @@ namespace NetworkResetTool
         }
 
         private bool _isUpdatingGuestLogons = false;
+        private bool _isConfirming = false;
 
         private void InitializeInsecureGuestLogonsState()
         {
@@ -228,34 +229,70 @@ namespace NetworkResetTool
         private void InsecureGuestLogons_Checked(object sender, RoutedEventArgs e)
         {
             if (_isUpdatingGuestLogons) return;
+            if (_isConfirming) return;
 
-            AddLog("INFO", "Enabling Insecure Guest Logons in Registry...");
-            bool success = NetworkManager.SetInsecureGuestLogonsState(true);
-            if (success)
+            var result = MessageBox.Show(
+                "Enabling Insecure Guest Logons allows anonymous client access to unauthenticated SMB shares, which decreases system security.\n\n" +
+                "Are you sure you want to enable this feature?",
+                "Confirm Enable Insecure Guest Logons",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (result == MessageBoxResult.Yes)
             {
-                AddLog("SUCCESS", "Insecure Guest Logons ENABLED successfully. A restart is recommended.");
+                AddLog("INFO", "Enabling Insecure Guest Logons in Registry...");
+                bool success = NetworkManager.SetInsecureGuestLogonsState(true);
+                if (success)
+                {
+                    AddLog("SUCCESS", "Insecure Guest Logons ENABLED successfully. A restart is recommended.");
+                }
+                else
+                {
+                    AddLog("ERROR", "Failed to enable Insecure Guest Logons. Ensure you have administrator rights.");
+                    InitializeInsecureGuestLogonsState();
+                }
             }
             else
             {
-                AddLog("ERROR", "Failed to enable Insecure Guest Logons. Ensure you have administrator rights.");
-                InitializeInsecureGuestLogonsState();
+                _isConfirming = true;
+                InsecureGuestLogonsCheckBox.IsChecked = false;
+                _isConfirming = false;
             }
         }
 
         private void InsecureGuestLogons_Unchecked(object sender, RoutedEventArgs e)
         {
             if (_isUpdatingGuestLogons) return;
+            if (_isConfirming) return;
 
-            AddLog("INFO", "Disabling Insecure Guest Logons in Registry...");
-            bool success = NetworkManager.SetInsecureGuestLogonsState(false);
-            if (success)
+            var result = MessageBox.Show(
+                "Disabling Insecure Guest Logons blocks anonymous client access to SMB shares, which increases security.\n\n" +
+                "Are you sure you want to disable this feature?",
+                "Confirm Disable Insecure Guest Logons",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (result == MessageBoxResult.Yes)
             {
-                AddLog("SUCCESS", "Insecure Guest Logons DISABLED successfully. A restart is recommended.");
+                AddLog("INFO", "Disabling Insecure Guest Logons in Registry...");
+                bool success = NetworkManager.SetInsecureGuestLogonsState(false);
+                if (success)
+                {
+                    AddLog("SUCCESS", "Insecure Guest Logons DISABLED successfully. A restart is recommended.");
+                }
+                else
+                {
+                    AddLog("ERROR", "Failed to disable Insecure Guest Logons. Ensure you have administrator rights.");
+                    InitializeInsecureGuestLogonsState();
+                }
             }
             else
             {
-                AddLog("ERROR", "Failed to disable Insecure Guest Logons. Ensure you have administrator rights.");
-                InitializeInsecureGuestLogonsState();
+                _isConfirming = true;
+                InsecureGuestLogonsCheckBox.IsChecked = true;
+                _isConfirming = false;
             }
         }
 
@@ -346,6 +383,18 @@ namespace NetworkResetTool
                 // Refresh statuses to update dot indicators
                 await LoadSharingStatusesAsync();
             }
+        }
+
+        private void InfoIcon_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(
+                "Enable Insecure Guest Logons Policy Details:\n\n" +
+                "Enabling insecure guest logons allows Windows to access unauthenticated SMB shares (like legacy NAS devices or local folders shared without a password).\n\n" +
+                "Warning: This policy decreases system security by allowing anonymous authentication over local network protocols. Ensure you only use this toggle in trusted local network environments.",
+                "Insecure Guest Logons Info",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
     }
 }
