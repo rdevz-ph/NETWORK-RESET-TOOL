@@ -210,6 +210,98 @@
             </Setter>
         </Style>
 
+        <!-- Modern Material TabControl -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local" SnapsToDevicePixels="true">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Tab Headers container -->
+                            <TabPanel x:Name="HeaderPanel" 
+                                      Grid.Row="0" 
+                                      Panel.ZIndex="1" 
+                                      IsItemsHost="true" 
+                                      Margin="0,0,0,10"
+                                      KeyboardNavigation.TabIndex="1"/>
+                            
+                            <!-- Content Display -->
+                            <Border x:Name="ContentPanel" 
+                                    Grid.Row="1" 
+                                    Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    KeyboardNavigation.DirectionalNavigation="Contained" 
+                                    KeyboardNavigation.TabIndex="2" 
+                                    KeyboardNavigation.TabNavigation="Cycle">
+                                <ContentPresenter x:Name="PART_SelectedContentHost" 
+                                                  ContentSource="SelectedContent" 
+                                                  Margin="{TemplateBinding Padding}" 
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Material TabItem -->
+        <Style TargetType="TabItem">
+            <Setter Property="Header" Value="{Binding Header, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Foreground" Value="{StaticResource ColorTextSecondary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontFamily" Value="Segoe UI Semibold, Segoe UI"/>
+            <Setter Property="FontSize" Value="14.5"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid SnapsToDevicePixels="true">
+                            <Border x:Name="mainBorder" 
+                                    Background="{TemplateBinding Background}" 
+                                    Padding="{TemplateBinding Padding}"
+                                    CornerRadius="6,6,0,0">
+                                <ContentPresenter x:Name="contentPresenter" 
+                                                  ContentSource="Header" 
+                                                  Focusable="false" 
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Border>
+                            <!-- Highlight Bar at the bottom of the tab item -->
+                            <Border x:Name="underline" 
+                                    Height="2.5" 
+                                    Background="Transparent" 
+                                    VerticalAlignment="Bottom"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="mainBorder" Property="Background" Value="#11FFFFFF"/>
+                                <Setter Property="Foreground" Value="{StaticResource ColorTextPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="mainBorder" Property="Background" Value="Transparent"/>
+                                <Setter TargetName="underline" Property="Background" Value="{StaticResource ColorAccent}"/>
+                                <Setter Property="Foreground" Value="{StaticResource ColorAccent}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#555555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Vector Icon Rotator Style (For progress spinners) -->
         <Style x:Key="SpinnerPathStyle" TargetType="Path">
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>

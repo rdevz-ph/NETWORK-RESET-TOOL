@@ -174,8 +174,8 @@
             <Grid.RowDefinitions>
                 <!-- Title & Privileges Badge -->
                 <RowDefinition Height="Auto"/>
-                <!-- Reset Steps -->
-                <RowDefinition Height="310"/>
+                <!-- Tab Control containing Resets and Sharing -->
+                <RowDefinition Height="365"/>
                 <!-- Reset Progress Bar & Control Buttons -->
                 <RowDefinition Height="Auto"/>
                 <!-- Live Logs Header -->
@@ -225,80 +225,198 @@
                 </Border>
             </Grid>
 
-            <!-- Reset Steps List -->
-            <Border Grid.Row="1" 
-                    Background="{StaticResource ColorSurface}" 
-                    BorderBrush="{StaticResource ColorBorder}" 
-                    BorderThickness="1" 
-                    CornerRadius="8" 
-                    Padding="15" 
-                    Margin="0,0,0,15">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl x:Name="StepsItemsControl">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource ColorBorder}" 
-                                        BorderThickness="0,0,0,1" 
-                                        Padding="0,10" 
-                                        Margin="0,0,0,0">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="30"/>
-                                            <ColumnDefinition Width="36"/>
-                                            <ColumnDefinition Width="220"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="90"/>
-                                        </Grid.ColumnDefinitions>
+            <!-- Tab Control Section (Row 1) -->
+            <TabControl Grid.Row="1" SelectionChanged="TabControl_SelectionChanged">
+                <!-- Tab 1: Reset Pipeline -->
+                <TabItem Header="Reset Pipeline">
+                    <Border Background="{StaticResource ColorSurface}" 
+                            BorderBrush="{StaticResource ColorBorder}" 
+                            BorderThickness="1" 
+                            CornerRadius="8" 
+                            Padding="15" 
+                            Height="310">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl x:Name="StepsItemsControl">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource ColorBorder}" 
+                                                BorderThickness="0,0,0,1" 
+                                                Padding="0,10" 
+                                                Margin="0,0,0,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="30"/>
+                                                    <ColumnDefinition Width="36"/>
+                                                    <ColumnDefinition Width="220"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                </Grid.ColumnDefinitions>
 
-                                        <!-- Manual Select Checkbox -->
-                                        <CheckBox Grid.Column="0" 
-                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  IsEnabled="{Binding ElementName=StartResetButton, Path=IsEnabled}"
-                                                  VerticalAlignment="Center" 
-                                                  HorizontalAlignment="Left"/>
+                                                <!-- Manual Select Checkbox -->
+                                                <CheckBox Grid.Column="0" 
+                                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                          Style="{StaticResource ModernCheckBox}"
+                                                          IsEnabled="{Binding ElementName=StartResetButton, Path=IsEnabled}"
+                                                          VerticalAlignment="Center" 
+                                                          HorizontalAlignment="Left"/>
 
-                                        <!-- Status Icon (Animated Spinning when running) -->
-                                        <Path Grid.Column="1" 
-                                              Data="{Binding IconData}" 
-                                              Fill="{Binding StatusBrush}" 
-                                              Width="16" Height="16" 
-                                              Style="{StaticResource SpinnerPathStyle}"
-                                              VerticalAlignment="Center" 
-                                              HorizontalAlignment="Left"/>
+                                                <!-- Status Icon (Animated Spinning when running) -->
+                                                <Path Grid.Column="1" 
+                                                      Data="{Binding IconData}" 
+                                                      Fill="{Binding StatusBrush}" 
+                                                      Width="16" Height="16" 
+                                                      Style="{StaticResource SpinnerPathStyle}"
+                                                      VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Left"/>
 
-                                        <!-- Description -->
-                                        <TextBlock Grid.Column="2" 
-                                                   Text="{Binding Description}" 
-                                                   Foreground="{StaticResource ColorTextPrimary}" 
-                                                   FontSize="13.5" 
-                                                   FontFamily="Segoe UI Semibold" 
-                                                   VerticalAlignment="Center"/>
+                                                <!-- Description -->
+                                                <TextBlock Grid.Column="2" 
+                                                           Text="{Binding Description}" 
+                                                           Foreground="{StaticResource ColorTextPrimary}" 
+                                                           FontSize="13.5" 
+                                                           FontFamily="Segoe UI Semibold" 
+                                                           VerticalAlignment="Center"/>
 
-                                        <!-- Command Text -->
-                                        <TextBlock Grid.Column="3" 
-                                                   Text="{Binding Command}" 
-                                                   Foreground="{StaticResource ColorTextSecondary}" 
-                                                   FontFamily="Consolas, Cascadia Code" 
-                                                   FontSize="12" 
-                                                   VerticalAlignment="Center" 
-                                                   Margin="10,0,0,0"/>
+                                                <!-- Command Text -->
+                                                <TextBlock Grid.Column="3" 
+                                                           Text="{Binding Command}" 
+                                                           Foreground="{StaticResource ColorTextSecondary}" 
+                                                           FontFamily="Consolas, Cascadia Code" 
+                                                           FontSize="12" 
+                                                           VerticalAlignment="Center" 
+                                                           Margin="10,0,0,0"/>
 
-                                        <!-- Status Text Badge -->
-                                        <TextBlock Grid.Column="4" 
-                                                   Text="{Binding StatusText}" 
-                                                   Foreground="{Binding StatusBrush}" 
-                                                   FontSize="12.5" 
-                                                   FontFamily="Segoe UI Semibold" 
-                                                   HorizontalAlignment="Right" 
-                                                   VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Border>
+                                                <!-- Status Text Badge -->
+                                                <TextBlock Grid.Column="4" 
+                                                           Text="{Binding StatusText}" 
+                                                           Foreground="{Binding StatusBrush}" 
+                                                           FontSize="12.5" 
+                                                           FontFamily="Segoe UI Semibold" 
+                                                           HorizontalAlignment="Right" 
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 2: Network Sharing -->
+                <TabItem Header="Network Sharing">
+                    <Border Background="{StaticResource ColorSurface}" 
+                            BorderBrush="{StaticResource ColorBorder}" 
+                            BorderThickness="1" 
+                            CornerRadius="8" 
+                            Padding="20" 
+                            Height="310">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Insecure Guest Logon Option (Row 0) -->
+                            <Border Grid.Row="0"
+                                    Background="{StaticResource ColorSurfaceLight}"
+                                    BorderBrush="{StaticResource ColorBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="12,10"
+                                    Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox x:Name="InsecureGuestLogonsCheckBox"
+                                              Content="Enable Insecure Guest Logons (Fix Network Sharing)"
+                                              Style="{StaticResource ModernCheckBox}"
+                                              Checked="InsecureGuestLogons_Checked"
+                                              Unchecked="InsecureGuestLogons_Unchecked"
+                                              IsEnabled="{Binding ElementName=StartResetButton, Path=IsEnabled}"
+                                              VerticalAlignment="Center"/>
+                                    <!-- Info path icon with ToolTip explaining what this is -->
+                                    <Path Data="M11,9H13V7H11V9M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
+                                          Fill="{StaticResource ColorTextSecondary}"
+                                          Width="14" Height="14"
+                                          Margin="8,0,0,0"
+                                          VerticalAlignment="Center"
+                                          ToolTip="Allows Windows client to access unauthenticated SMB shares. Fixes 'insecure guest logons are blocked' errors."/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Diagnostic Status List (Row 1) -->
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="Sharing &amp; Discovery Services Status" 
+                                               Foreground="{StaticResource ColorTextSecondary}" 
+                                               FontSize="11" 
+                                               Margin="0,0,0,8"
+                                               FontFamily="Segoe UI Semibold"/>
+                                    
+                                    <ItemsControl x:Name="SharingStatusItemsControl">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{StaticResource ColorBorder}" 
+                                                        BorderThickness="0,0,0,1" 
+                                                        Padding="0,6">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="130"/>
+                                                            <ColumnDefinition Width="85"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <!-- Service Name -->
+                                                        <TextBlock Grid.Column="0" 
+                                                                   Text="{Binding Name}" 
+                                                                   Foreground="{StaticResource ColorTextPrimary}" 
+                                                                   FontSize="13" 
+                                                                   VerticalAlignment="Center"/>
+                                                        
+                                                        <!-- Status indicator & Text -->
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Ellipse Width="8" Height="8" 
+                                                                     Fill="{Binding StatusBrush}" 
+                                                                     Margin="0,0,8,0" 
+                                                                     VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding StatusText}" 
+                                                                       Foreground="{StaticResource ColorTextPrimary}" 
+                                                                       FontSize="12.5" 
+                                                                       FontFamily="Segoe UI Semibold"
+                                                                       VerticalAlignment="Center"/>
+                                                        </StackPanel>
+
+                                                        <!-- Action Button -->
+                                                        <Button Grid.Column="2" 
+                                                                Content="Start" 
+                                                                Style="{StaticResource SecondaryButton}" 
+                                                                Padding="8,3"
+                                                                FontSize="11" 
+                                                                IsEnabled="{Binding CanStart}"
+                                                                Click="StartService_Click"
+                                                                VerticalAlignment="Center" 
+                                                                HorizontalAlignment="Right"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <!-- Refresh Button (Row 2) -->
+                            <Button Grid.Row="2"
+                                    x:Name="RefreshSharingStatusButton"
+                                    Content="Scan Sharing Statuses"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="15,6"
+                                    FontSize="12"
+                                    HorizontalAlignment="Left"
+                                    Click="RefreshSharingStatus_Click"/>
+                        </Grid>
+                    </Border>
+                </TabItem>
+            </TabControl>
 
             <!-- Progress & Controls -->
             <Grid Grid.Row="2" Margin="0,0,0,15">

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using NetworkResetTool.Models;
 
@@ -15,6 +16,7 @@ namespace NetworkResetTool
         public ObservableCollection<AdapterInfo> Adapters { get; } = new();
         public ObservableCollection<ResetStep> ResetSteps { get; } = new();
         public ObservableCollection<LogMessage> LogMessages { get; } = new();
+        public ObservableCollection<SharingStatusItem> SharingStatuses { get; } = new();
 
         [DllImport("dwmapi.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
         public static extern void DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int pvAttribute, int cbAttribute);
@@ -54,6 +56,7 @@ namespace NetworkResetTool
             AdaptersItemsControl.ItemsSource = Adapters;
             StepsItemsControl.ItemsSource = ResetSteps;
             LogsItemsControl.ItemsSource = LogMessages;
+            SharingStatusItemsControl.ItemsSource = SharingStatuses;
 
             // Auto scroll terminal log to the bottom when new logs are added
             LogMessages.CollectionChanged += (s, e) =>
@@ -64,8 +67,14 @@ namespace NetworkResetTool
             // Initialize Reset Steps
             InitializeResetSteps();
 
+            // Initialize Sharing Status List
+            InitializeSharingStatuses();
+
             // Load initial network configuration
             LoadNetworkConfigurations();
+
+            // Initialize insecure guest logons state from registry
+            InitializeInsecureGuestLogonsState();
         }
 
         private void InitializeResetSteps()
@@ -193,6 +202,150 @@ namespace NetworkResetTool
 
             // Re-enable start button
             StartResetButton.IsEnabled = true;
+        }
+
+        private bool _isUpdatingGuestLogons = false;
+
+        private void InitializeInsecureGuestLogonsState()
+        {
+            _isUpdatingGuestLogons = true;
+            try
+            {
+                bool isEnabled = NetworkManager.GetInsecureGuestLogonsState();
+                InsecureGuestLogonsCheckBox.IsChecked = isEnabled;
+                AddLog("INFO", $"Current Registry policy: Insecure Guest Logons are {(isEnabled ? "ENABLED" : "DISABLED")}.");
+            }
+            catch (Exception ex)
+            {
+                AddLog("ERROR", $"Failed to read Insecure Guest Logons registry: {ex.Message}");
+            }
+            finally
+            {
+                _isUpdatingGuestLogons = false;
+            }
+        }
+
+        private void InsecureGuestLogons_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingGuestLogons) return;
+
+            AddLog("INFO", "Enabling Insecure Guest Logons in Registry...");
+            bool success = NetworkManager.SetInsecureGuestLogonsState(true);
+            if (success)
+            {
+                AddLog("SUCCESS", "Insecure Guest Logons ENABLED successfully. A restart is recommended.");
+            }
+            else
+            {
+                AddLog("ERROR", "Failed to enable Insecure Guest Logons. Ensure you have administrator rights.");
+                InitializeInsecureGuestLogonsState();
+            }
+        }
+
+        private void InsecureGuestLogons_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingGuestLogons) return;
+
+            AddLog("INFO", "Disabling Insecure Guest Logons in Registry...");
+            bool success = NetworkManager.SetInsecureGuestLogonsState(false);
+            if (success)
+            {
+                AddLog("SUCCESS", "Insecure Guest Logons DISABLED successfully. A restart is recommended.");
+            }
+            else
+            {
+                AddLog("ERROR", "Failed to disable Insecure Guest Logons. Ensure you have administrator rights.");
+                InitializeInsecureGuestLogonsState();
+            }
+        }
+
+        private void InitializeSharingStatuses()
+        {
+            SharingStatuses.Add(new SharingStatusItem { Name = "File & Printer Sharing (LanmanServer)", ServiceName = "LanmanServer" });
+            SharingStatuses.Add(new SharingStatusItem { Name = "Workstation Client (LanmanWorkstation)", ServiceName = "LanmanWorkstation" });
+            SharingStatuses.Add(new SharingStatusItem { Name = "Network Discovery (FDResPub)", ServiceName = "FDResPub" });
+            SharingStatuses.Add(new SharingStatusItem { Name = "SSDP Discovery Device Host (SSDPSRV)", ServiceName = "SSDPSRV" });
+        }
+
+        private async Task LoadSharingStatusesAsync()
+        {
+            AddLog("INFO", "Scanning network sharing services status...");
+
+            // Check LanmanServer (File sharing server)
+            bool lanmanServerRunning = await NetworkManager.IsServiceRunningAsync("LanmanServer");
+            UpdateSharingStatus("File & Printer Sharing (LanmanServer)", lanmanServerRunning);
+
+            // Check LanmanWorkstation (Workstation client)
+            bool lanmanWorkstationRunning = await NetworkManager.IsServiceRunningAsync("LanmanWorkstation");
+            UpdateSharingStatus("Workstation Client (LanmanWorkstation)", lanmanWorkstationRunning);
+
+            // Check FDResPub (Function Discovery Resource Publication)
+            bool fdResPubRunning = await NetworkManager.IsServiceRunningAsync("FDResPub");
+            UpdateSharingStatus("Network Discovery (FDResPub)", fdResPubRunning);
+
+            // Check SSDPSRV (SSDP Discovery)
+            bool ssdpsrvRunning = await NetworkManager.IsServiceRunningAsync("SSDPSRV");
+            UpdateSharingStatus("SSDP Discovery Device Host (SSDPSRV)", ssdpsrvRunning);
+
+            AddLog("INFO", "Network sharing status scan complete.");
+        }
+
+        private void UpdateSharingStatus(string displayName, bool isRunning)
+        {
+            foreach (var item in SharingStatuses)
+            {
+                if (item.Name == displayName)
+                {
+                    item.IsActive = isRunning;
+                    item.StatusText = isRunning ? "Running" : "Stopped";
+                    break;
+                }
+            }
+        }
+
+        private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl tabControl)
+            {
+                if (tabControl.SelectedItem is TabItem selectedTab)
+                {
+                    if (selectedTab.Header?.ToString() == "Network Sharing")
+                    {
+                        await LoadSharingStatusesAsync();
+                    }
+                }
+            }
+        }
+
+        private async void RefreshSharingStatus_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshSharingStatusButton.IsEnabled = false;
+            await LoadSharingStatusesAsync();
+            RefreshSharingStatusButton.IsEnabled = true;
+        }
+
+        private async void StartService_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is SharingStatusItem item)
+            {
+                button.IsEnabled = false;
+                AddLog("INFO", $"Attempting to start service: {item.ServiceName} ({item.Name})...");
+
+                // Run net start in process asynchronously
+                var result = await NetworkManager.ExecuteCommandAsync($"net start {item.ServiceName}", null, null);
+                if (result.ExitCode == 0)
+                {
+                    AddLog("SUCCESS", $"Service {item.ServiceName} started successfully.");
+                }
+                else
+                {
+                    AddLog("ERROR", $"Failed to start service {item.ServiceName}. Exit code: {result.ExitCode}");
+                    AddLog("ERROR", $"Details: {result.Output.Trim()}");
+                }
+
+                // Refresh statuses to update dot indicators
+                await LoadSharingStatusesAsync();
+            }
         }
     }
 }

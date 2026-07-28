@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using NetworkResetTool.Models;
 
 namespace NetworkResetTool
@@ -105,8 +106,8 @@ namespace NetworkResetTool
 
         public static async Task<(int ExitCode, string Output)> ExecuteCommandAsync(
             string fullCommand, 
-            Action<string> onOutputLine, 
-            Action<string> onErrorLine)
+            Action<string>? onOutputLine, 
+            Action<string>? onErrorLine)
         {
             string fileName;
             string arguments;
@@ -169,6 +170,61 @@ namespace NetworkResetTool
             }
 
             return await tcs.Task;
+        }
+
+        public static bool GetInsecureGuestLogonsState()
+        {
+            try
+            {
+                using (var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"))
+                {
+                    if (key != null)
+                    {
+                        var val = key.GetValue("AllowInsecureGuestAuth");
+                        if (val != null && val is int intVal)
+                        {
+                            return intVal == 1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading registry: {ex.Message}");
+            }
+            return false;
+        }
+
+        public static bool SetInsecureGuestLogonsState(bool enabled)
+        {
+            try
+            {
+                using (var parentKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\LanmanWorkstation", true))
+                {
+                    if (parentKey != null)
+                    {
+                        using (var key = parentKey.CreateSubKey("Parameters"))
+                        {
+                            if (key != null)
+                            {
+                                key.SetValue("AllowInsecureGuestAuth", enabled ? 1 : 0, RegistryValueKind.DWord);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error writing registry: {ex.Message}");
+            }
+            return false;
+        }
+
+        public static async Task<bool> IsServiceRunningAsync(string serviceName)
+        {
+            var result = await ExecuteCommandAsync($"sc query {serviceName}", null, null);
+            return result.Output.Contains("RUNNING");
         }
     }
 }

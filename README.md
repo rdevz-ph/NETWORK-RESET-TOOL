@@ -1,6 +1,8 @@
 # Network Reset Utility
 
-![Network Reset Utility Screenshot](screenshot.png)
+| Reset Pipeline | Network Sharing |
+| :---: | :---: |
+| ![Reset Network Screenshot](screenshot_reset.png) | ![Network Sharing Screenshot](screenshot_sharing.png) |
 
 A modern, high-performance desktop tool built with C# and .NET 8.0 WPF. It executes network adapter diagnostic and reset commands in sequence, displaying real-time terminal logs and autodetecting network configurations. It runs with Administrator privileges via an embedded manifest.
 
@@ -12,6 +14,7 @@ A modern, high-performance desktop tool built with C# and .NET 8.0 WPF. It execu
 - **Material Dark Design**: Sleek dark backgrounds, modern layout, custom scrollbar styling, and smooth transition animations.
 - **Asynchronous Processing**: Shell commands run in a background thread to prevent UI freezing.
 - **UAC Privilege Elevation**: Manifest configures the application to require administrator rights on startup.
+- **Network Sharing & Discovery Fixes**: A dedicated diagnostic dashboard to toggle insecure guest logons (modifying system registry) and manually start crucial network sharing and discovery services (`LanmanServer`, `LanmanWorkstation`, `FDResPub`, `SSDPSRV`) directly from the tool.
 
 ---
 
